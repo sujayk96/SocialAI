@@ -3,7 +3,7 @@ import csv
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, url_for, flash, redirect
-from scrape import *
+#from scrape import *
 
 app = Flask(__name__)
 
@@ -37,6 +37,9 @@ def viz():
 @app.route("/uploaded_data")
 def upload():
     df = pd.read_csv("df_viz_1.csv")
+    df = df[["datetime","author","op"]]
+    df.sort_values(by='datetime')
+
     return df.to_csv()
 
 if __name__ == '__main__':

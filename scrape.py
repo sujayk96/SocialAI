@@ -37,12 +37,12 @@ def data_prep_comments(term, start_time, end_time, filters, limit):
 
 def generate_csv(search_term):
     subreddit = search_term     #Subreddit we are auditing
-    start_time = int(dt.datetime(2021, 1, 1).timestamp())  
+    start_time = int(dt.datetime(2022, 1, 1).timestamp())  
                                      #Starting date for our search
-    end_time = int(dt.datetime(2022, 1, 31).timestamp())   
+    end_time = int(dt.datetime(2022, 12, 1).timestamp())   
                                      #Ending date for our search
     filters = []                     #We don´t want specific filters
-    limit = 100000                     #Elelemts we want to recieve
+    limit = 1000000                     #Elelemts we want to recieve
 
     """Here we are going to get subreddits for a brief analysis"""
     #Call function for dataframe creation of comments
@@ -57,7 +57,7 @@ def generate_csv(search_term):
     #Convert timestamp format to datetime for data analysis               
     df_p["datetime"] = pd.to_datetime(df_p["datetime"])
     term = 'depression'            #Term we want to search for
-    limit = 10               #Number of elelemts 
+    limit = 1000000               #Number of elelemts 
     df_c = data_prep_comments(term, start_time,
                      end_time, filters, limit)
     print("asdfasdf")
@@ -69,3 +69,5 @@ def generate_csv(search_term):
     df_p.to_csv(str(search_term)+"posts.csv")
 
 #if __name__== "__main__" : main()
+
+generate_csv("depression")

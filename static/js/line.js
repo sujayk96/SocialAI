@@ -39,28 +39,30 @@ d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/da
       .range(d3.schemeSet2);
 
     // Add X axis --> it is a date format
-    var x = d3.scaleLinear()
-      .domain([0,10])
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
       .range([ 0, width ]);
     svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
     // Add Y axis
-    var y = d3.scaleLinear()
-      .domain( [0,20])
+   var y = d3.scaleLinear()
+      .domain([0, d3.max(data, function(d) { return +d.value; })])
       .range([ height, 0 ]);
     svg.append("g")
       .call(d3.axisLeft(y));
 
     // Initialize line with group a
-    var line = svg
-      .append('g')
-      .append("path")
-        .datum(data)
-        .attr("d", d3.line()
-          .x(function(d) { return x(+d.time) })
-          .y(function(d) { return y(+d.valueA) })
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+
         )
         .attr("stroke", function(d){ return myColor("valueA") })
         .style("stroke-width", 4)
@@ -70,7 +72,7 @@ d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/da
     function update(selectedGroup) {
 
       // Create new data with the selection?
-      var dataFilter = data.map(function(d){return {time: d.time, value:d[selectedGroup]} })
+      var dataFilter = data.map(function(d){return {time: d.time, value:d.op} })
 
       // Give these new data to update line
       line
@@ -78,8 +80,8 @@ d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/da
           .transition()
           .duration(1000)
           .attr("d", d3.line()
-            .x(function(d) { return x(+d.time) })
-            .y(function(d) { return y(+d.value) })
+            .x(function(d) { return x(d.time) })
+            .y(function(d) { return y(d.value) })
           )
           .attr("stroke", function(d){ return myColor(selectedGroup) })
     }
