@@ -35,7 +35,7 @@ def data_prep_comments(term, start_time, end_time, filters, limit):
         limit=limit))           #Max number of comments
     return pd.DataFrame(comments) #Return dataframe for analysis
 
-def generate_csv(search_term):
+def generate_csv(search_term, stDate, endDate):
     subreddit = search_term     #Subreddit we are auditing
     start_time = int(dt.datetime(2022, 1, 1).timestamp())  
                                      #Starting date for our search

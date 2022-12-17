@@ -17,7 +17,7 @@
 console.log("in line.js")
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 100, bottom: 30, left: 30},
-    width = 660 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
@@ -35,6 +35,7 @@ d3.csv("/uploaded_data", function(data) {
     // for (var i = 0; i < data.length; i++) {
     //     console.log(data[i].author);
     // } 
+    
 
     var allGroup = [...new Set(data.map(d => d.author))]; 
     //console.log(allGroup); 
@@ -54,34 +55,52 @@ d3.csv("/uploaded_data", function(data) {
     var myColor = d3.scaleOrdinal()
       .domain(allGroup)
       .range(d3.schemeSet2);
-
+    //var format =   d3.time.format("%Y-%m");
     // Add X axis --> it is a date format
     var x = d3.scaleTime()
-      .domain(d3.extent(data, function(d) { return d3.timeParse("%Y-%m-%d")(d.datetime); }))
+      .domain(d3.extent(data, function(d) { 
+      	var formatDate = d3.timeFormat("%b-%Y")
+      	return d3.timeParse("%Y-%m-%d")(d.datetime); }))
       .range([ 0, width ]);
+
     svg.append("g")
       .attr("transform", "translate(0," + height + ")")
+      .text("Time")
       .call(d3.axisBottom(x));
 
     // Add Y axis
    var y = d3.scaleLinear()
-      .domain([0, 10])
+      .domain([0, 15])
       .range([ height, 0 ]);
     svg.append("g")
+    .text("Number of posts classified as depressed")
       .call(d3.axisLeft(y));
+
+
+	console.log(allGroup[0])
+	 var dataFilter = data.filter(function(d) 
+	{ 
+
+        if( d["author"] == allGroup[0])
+        { 
+            return d;
+        } 
+
+    })
 
     // Initialize line with group a
     var line = svg.append("path")
-      .datum(data)
+      .datum(dataFilter)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
+      
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
         .x(function(d) { return x(d3.timeParse("%Y-%m-%d")(d.datetime)) })
         .y(function(d) { return y(d.op) })
 
         )
-        .attr("stroke", function(d){ return myColor("valueA") })
+        .attr("stroke", function(d){ return myColor(allGroup[0]) })
         .style("stroke-width", 4)
         .style("fill", "none")
 

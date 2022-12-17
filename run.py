@@ -25,8 +25,10 @@ def test():
     if request.method == "POST":
         #print(request)
         search = request.form['search_term']
-        print(search)
-        generate_csv(search)
+        stDate = request.form['stDate']
+        endDate = request.form['endDate']
+        print(search, stDate, endDate)
+        #generate_csv(search, stDate, endDate)
 
     return render_template('test.html')
 
@@ -36,7 +38,7 @@ def viz():
 
 @app.route("/uploaded_data")
 def upload():
-    df = pd.read_csv("df_viz_1.csv")
+    df = pd.read_csv("df_viz_2.csv")
     df = df[["datetime","author","op"]]
     df.sort_values(by='datetime')
 

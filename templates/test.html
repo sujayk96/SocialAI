@@ -1,16 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Add a New Message {% endblock %}</h1>
+    <h1>{% block title %} Which subreddit are you interested in? {% endblock %}</h1>
     <form method="post">
         <label for="search_term">Search</label>
-        <br>
         <input type="text" name="search_term"
                placeholder="Message title"
                value="{{ request.form['search_term'] }}"></input>
         <br>
-
-
+        <label for="stDate">Start Date:</label>
+        <input type="date" id="stDate" name="stDate">
+        <br>
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate">
+        <br>
         <button type="submit">Submit</button>
     </form>
 <br>
