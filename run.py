@@ -12,24 +12,10 @@ from transformer_model import *
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)  # Generates a random 32-character hex string
 
-
-comments = pd.read_csv("comments.csv")
-posts = pd.read_csv("posts.csv")
-
-messages = [{'search term': 'Message One',
-             'content': 'Message One Content'},
-            {'author': 'Message Two',
-             'content': 'Message Two Content'}
-            ]
-
-@app.route('/')
-def index():
-    return render_template('home.html',messages=messages)
-
 class SearchForm(FlaskForm):
     search_term = StringField('Search Term', validators=[DataRequired()])
     submit = SubmitField('Search')
-@app.route('/test', methods=["GET","POST"])
+@app.route('/', methods=["GET","POST"])
 def test():
 
     if request.method == "POST":
@@ -50,11 +36,6 @@ def test():
         form = SearchForm()
         search_results = []
     return render_template('index.html', form=form, search_results=search_results)
-
-@app.route('/viz')
-def viz():
-    return render_template('viz.html')
-
 
 @app.route('/get_user/<keyword>', methods=['GET'])
 def get_user(keyword):
