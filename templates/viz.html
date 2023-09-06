@@ -1,147 +1,92 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Time-Series Chart with D3.js</title>
+    <!-- Include D3.js library from the static route -->
+    <script src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <!-- Chart container -->
+    <div style="width: 80%; margin: 0 auto;">
+        <svg id="timeSeriesChart" width="800" height="400"></svg>
+    </div>
 
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-
-<!-- Initialize a select button -->
-<select id="selectButton"></select>
-
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
-
-<!-- Color Scale -->
-<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-
-<script>
-console.log("in line.js")
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 100, bottom: 30, left: 30},
-    width = 900 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-//Read the data
-d3.csv("/uploaded_data", function(data) {
-
-    // for (var i = 0; i < data.length; i++) {
-    //     console.log(data[i].author);
-    // } 
-    
-
-    var allGroup = [...new Set(data.map(d => d.author))]; 
-    //console.log(allGroup); 
-    // List of groups (here I have one group per column)
-    //var allGroup = ["valueA", "valueB", "valueC"]
-
-    // add the options to the button
-    d3.select("#selectButton")
-      .selectAll('myOptions')
-      .data(allGroup)
-      .enter()
-      .append('option')
-      .text(function (d) { return d; }) // text showed in the menu
-      .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-    // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal()
-      .domain(allGroup)
-      .range(d3.schemeSet2);
-    //var format =   d3.time.format("%Y-%m");
-    // Add X axis --> it is a date format
-    var x = d3.scaleTime()
-      .domain(d3.extent(data, function(d) { 
-      	var formatDate = d3.timeFormat("%b-%Y")
-      	return d3.timeParse("%Y-%m-%d")(d.datetime); }))
-      .range([ 0, width ]);
-
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .text("Time")
-      .call(d3.axisBottom(x));
-
-    // Add Y axis
-   var y = d3.scaleLinear()
-      .domain([0, 15])
-      .range([ height, 0 ]);
-    svg.append("g")
-    .text("Number of posts classified as depressed")
-      .call(d3.axisLeft(y));
+    <!-- JavaScript code for creating the chart (as shown in the previous examples) -->
+    <script>
+        // Access data passed from Flask
+        const data_json = {{ data | tojson | safe }};
+        const data = JSON.parse(data_json);
 
 
-	console.log(allGroup[0])
-	 var dataFilter = data.filter(function(d) 
-	{ 
+        // Parse date strings to date objects and convert values to numbers
+        const parseTime = d3.utcParse("%Y-%m-%dT%H:%M:%SZ");
+        const tmp = new Date(1646768000000);
+        console.log("pre we are seeing the data in html", tmp);
+        data.forEach(d => {
+            d.created_utc = new Date(d.created_utc);
+            d.Score = +d.Score;
+        });
+        //console.log("we are seeing the data in html",data);
+        // ... Your D3.js code here, using the 'data' variable ...
+        // Create a container for the chart
+                const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+                const width = 800 - margin.left - margin.right;
+                const height = 400 - margin.top - margin.bottom;
 
-        if( d["author"] == allGroup[0])
-        { 
-            return d;
-        } 
+                const svg = d3.select("#timeSeriesChart")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    })
+                // Create scales for x and y axes using the data range
+                const x = d3.scaleTime()
+                    .domain(d3.extent(data, d => d.created_utc))
+                    .range([0, width]);
 
-    // Initialize line with group a
-    var line = svg.append("path")
-      .datum(dataFilter)
-      .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      
-      .attr("stroke-width", 1.5)
-      .attr("d", d3.line()
-        .x(function(d) { return x(d3.timeParse("%Y-%m-%d")(d.datetime)) })
-        .y(function(d) { return y(d.op) })
+                const y = d3.scaleLinear()
+                    .domain([0, d3.max(data, d => d.Score)])
+                    .nice()
+                    .range([height, 0]);
 
-        )
-        .attr("stroke", function(d){ return myColor(allGroup[0]) })
-        .style("stroke-width", 4)
-        .style("fill", "none")
+                // Create the line generator
+                const line = d3.line()
+                    .x(d => x(d.created_utc))
+                    .y(d => y(d.Score))
+                    .curve(d3.curveLinear);
 
-    // A function that update the chart
-    function update(selectedGroup) {
+                // Append the line to the chart
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "steelblue")
+                    .attr("stroke-width", 2)
+                    .attr("d", line);
 
-      // Create new data with the selection?
+                // Create x and y axes
+                svg.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(x));
 
-      var dataFilter = data.filter(function(d) 
-	{ 
+                svg.append("g")
+                    .call(d3.axisLeft(y));
 
-        if( d["author"] == selectedGroup)
-        { 
-            return d;
-        } 
+                // Add labels for the axes
+                svg.append("text")
+                    .attr("transform", `translate(${width / 2},${height + margin.top + 20})`)
+                    .style("text-anchor", "middle")
+                    .text("Time");
 
-    })
-      console.log(dataFilter);
-     // var dataFilter = data.map(function(d){return {time: d.time, value:d.op} })
+                svg.append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 0 - margin.left)
+                    .attr("x", 0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .text("Score");
 
-      // Give these new data to update line
-      line
-          .datum(dataFilter)
-          .transition()
-          .duration(1000)
-          .attr("d", d3.line()
-            .x(function(d) { return x(d3.timeParse("%Y-%m-%d")(d.datetime)) })
-            .y(function(d) { return y(d.op) })
-          )
-          .attr("stroke", function(d){ return myColor(selectedGroup) })
-    }
-
-    // When the button is changed, run the updateChart function
-    d3.select("#selectButton").on("change", function(d) {
-        // recover the option that has been chosen
-        var selectedOption = d3.select(this).property("value")
-        // run the updateChart function with this selected option
-        update(selectedOption)
-    })
-
-})
-
-
-</script>
+    </script>
+</body>
+</html>

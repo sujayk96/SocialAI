@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search and Display Table</title>
+
+    <!-- Include DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+
+    <!-- Include jQuery and DataTables JavaScript -->
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+    <!-- DataTables initialization -->
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable({
+                // DataTables options go here
+            });
+        });
+    </script>
+
+
+</head>
+<body>
+    <h1>Search and Display Table</h1>
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        <label for="search_term">Search Term:</label>
+        {{ form.search_term(class="form-control") }}
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <br>
+    <br>
+    {% if search_results %}
+    <table id="dataTable" class="display">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Author</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in search_results %}
+            <tr>
+                <td>{{ item.created_utc }}</td>
+                <td>{{ item.Title }}</td>
+                <td><a href="/get_user/{{ item.Author }}"> {{ item.Author }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</body>
+</html>
